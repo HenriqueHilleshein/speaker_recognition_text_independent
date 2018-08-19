@@ -104,7 +104,7 @@ if doc.endswith(".wav")]:
     file = file.split('.')
     filename_out = (VOICE_SAMPLES_TEST_PATH + "coefficients/" 
                     + file[0] + ".out")    
-    numpy.savetxt(filename_out,mfccs)
+    numpy.savetxt(filename_out,mfccs, delimiter=",")
 
 #mfccsfile = numpy.loadtxt('test.out')
 ### Plot audio
