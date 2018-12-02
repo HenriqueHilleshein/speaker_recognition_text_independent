@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<title>Live input record and playback</title>
+  <style type='text/css'>
+    ul { list-style: none; }
+    #recordingslist audio { display: block; margin-bottom: 10px; }
+  </style>
+</head>
+<body>
+
+  <h1>Train</h1>
+  <p>ID</p>
+  <input type="id" id="id" name="id">
+  <div id="trainTextsDiv">
+  <p>Press record and after you finished press stop. Try speak for 1 min</p>
+  <p>Algumas espécies, incluindo abelhas, abelhões, e abelhas sem ferrão vivem socialmente em colônias. As abelhas estão adaptadas a uma alimentação de néctar e pólen, o primeiro principalmente como uma fonte de energia e os último principalmente pelas proteínas e outros nutrientes. A maioria do pólen é usado como o alimento para as larvas. A polinização das abelhas é importante tanto ecologicamente como comercialmente; o declínio em abelhas selvagens aumentou o valor da polinização por colmeias, geridas comercialmente, de abelhas melíferas.
+  </p>
+  <p>A humanidade iniciou a exploração física do espaço no século XX, com o advento dos balões de grande altitude, seguido por desenvolvimentos tecnológicos que vieram a propiciar, décadas depois, o lançamento de foguetes espaciais. O alcance da órbita geocêntrica foi conseguido pela primeira vez por Yuri Gagarin, da União Soviética, em 1961. Desde então, espaçonaves não tripuladas têm viajado por todos os planetas do Sistema Solar. Em decorrência do alto custo para a execução de viagens tripuladas, tais missões têm se limitado à órbita terrestre baixa ou à Lua. O espaço sideral representa o que há de mais desafiador à ciência e perigoso à exploração humana, sobretudo pela complexidade desse ambiente e pelos riscos e ameaças do vácuo e radiação. A microgravidade, por exemplo, tem um efeito nocivo à fisiologia humana. Questões de saúde, ambientais, econômicas e tecnológicas têm colocado em cheque o progresso da atividade, muito embora a evolução científica que esse tipo de exploração pode proporcionar seja considerada inestimável.</p>
+  <button onclick="startRecording(this);">record</button>
+  <button onclick="stopRecording(this);" disabled>stop</button>
+  <input type="progress" id="progress" name="progress"><br>
+  <h2>Recordings</h2>
+  <ul id="recordingslist"></ul>
+  
+  </div>
+  <br>
+  <button onclick="train(this);">Train</button>
+  <p id=response></p>
+  <script>
+  
+  function populate() {
+      trainTextsDiv = document.getElementById("trainTextsDiv")	  
+      var keys = Object.keys(allTrainingTexts)
+      for(var i = 0;i<keys.length;i++){
+          var key = keys[i];
+          var text = allTrainingTexts[key];
+          var trainText = document.createElement('p')
+          var startButton = document.createElement('button')
+          var stopButton = document.createElement('button')
+          var progress = document.createElement('input')
+          var h2 = document.createElement('h2')
+          var recordingslist = document.createElement('ul')
+	  trainText.innerHTML = text
+	  startButton.onclick = function() {train(this)}
+	  startButton.innerHTML = "record"
+	  stopButton.onclick = function() {stopRecording(this)}
+	  stopButton.innerHTML = "stop"
+	  stopButton.id = i.toString();
+	  stopButton.disabled = true
+	  progress.type = "text"
+	  progress.id = "progress" + i.toString()
+          h2.innerHTML = "Recordings"
+	  recordingslist.id = "recordingslist" + i.toString()
+          trainTextsDiv.appendChild(trainText);
+          trainTextsDiv.appendChild(startButton);
+          trainTextsDiv.appendChild(stopButton);
+          trainTextsDiv.appendChild(progress);
+          trainTextsDiv.appendChild(h2);
+          trainTextsDiv.appendChild(recordingslist);
+
+	      
+  }
+  function after_trained() {
+      element = document.getElementById("response")
+      element.innerHTML = "Trained"	  
+  }	  
+  function train() {
+      element = document.getElementById("id")
+      var myJson = {};
+      myJson['action'] = "train";
+      myJson['id'] = element.value 
+      postJSONFile("action.json",myJson, after_trained) 
+  }	  
+  var audio_context;
+  var recorder;
+  function startUserMedia(stream) {
+    var input = audio_context.createMediaStreamSource(stream);
+    // Uncomment if you want the audio to feedback directly
+   // input.connect(audio_context.destination);
+   // __log('Input connected to audio context destination.');
+    
+    recorder = new Recorder(input);
+  }
+  function startRecording(button) {
+    recorder && recorder.record();
+    button.disabled = true;
+    button.nextElementSibling.disabled = false;
+  }
+  function stopRecording(button) {
+    recorder && recorder.stop();
+    button.disabled = true;
+    button.previousElementSibling.disabled = false;
+    // create WAV download link using audio data blob
+    createDownloadLink(button.id);
+    
+    recorder.clear();
+  }
+  function createDownloadLink(id) {
+    recorder && recorder.exportWAV(function(blob) {
+      var url = URL.createObjectURL(blob);
+      var li = document.createElement('li');
+      var au = document.createElement('audio');
+      var hf = document.createElement('a');
+      
+      au.controls = true;
+      au.src = url;
+      hf.href = url;
+      hf.download = new Date().toISOString() + '.wav';
+      hf.innerHTML = hf.download;
+      li.appendChild(au);
+      li.appendChild(hf);
+      var recordingslist = document.getElementById("recordingslist" + id)
+      recordingslist.appendChild(li);
+      upload(blob, id)
+    }); 
+    console.log(recorder)
+     
+  }
+  window.onload = function init() {
+    try {
+      // webkit shim
+      window.AudioContext = window.AudioContext || window.webkitAudioContext;
+      navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia;
+      window.URL = window.URL || window.webkitURL;
+      
+      audio_context = new AudioContext;
+      
+    } catch (e) {
+      alert('No web audio support in this browser!');
+    }
+    
+    navigator.getUserMedia({audio: true}, startUserMedia, function(e) {
+    });
+
+    getJSONFile("trainingTexts.json", set_all_training_texts)
+  };
+  </script>
+
+  <script src="js/recorder.js"></script>
+  <script src="js/upload.js"></script>
+  <script src="js/utils.js"></script>
+</body>
+</html>

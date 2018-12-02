@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Training UBM</title>
+    </head>
+    <body>
+        <h1>Train</h1>
+	<h2>ID List</h2>
+	<div id="idlist">
+        </div>
+        <br>
+        <button onclick="train(this);">Train</button>
+        <p id=response></p>
+        <script src="js/upload.js"></script>
+        <script src="js/utils.js"></script>
+    </body>
+    <script>
+    var all_available_IDs = {}
+    function after_trained() {
+        element = document.getElementById("response")
+        element.innerHTML = "Trained"	  
+    }
+    function train() {
+        idList = document.getElementById("idlist")	  
+        var keys = Object.keys(all_available_IDs)
+        var numberOfKeys = keys.length
+        for(var i = 0;i<numberOfKeys;i++){
+            var speakerId = keys[i];
+            speakerChecker = document.getElementById(speakerId)
+            all_available_IDs[speakerId] = speakerChecker.checked 
+	}
+        postJSONFile("trainubmlist.json", all_available_IDs, after_trained)  
+    }
+    function populate() {
+        idList = document.getElementById("idlist")	  
+        var keys = Object.keys(all_available_IDs)
+        var numberOfKeys = keys.length
+        for(var i = 0;i<numberOfKeys;i++){
+            var speakerId = keys[i];
+            var speakerChecker = document.createElement('input')
+	    var speakerP = document.createElement('span')
+            var br = document.createElement('br')
+	    speakerChecker.type = "checkbox"
+	    speakerChecker.id = speakerId
+            speakerChecker.checked = false
+            speakerP.innerHTML = speakerId
+	    idList.appendChild(speakerChecker)
+	    idList.appendChild(speakerP)
+	    idList.appendChild(br)
+	}
+    }
+    function set_all_available_IDs(response){
+        all_available_IDs = response
+	populate()
+    }
+    window.onload = function init() {
+        getJSONFile("allavailableIDs.json", set_all_available_IDs)
+    }
+    </script>
+</html>

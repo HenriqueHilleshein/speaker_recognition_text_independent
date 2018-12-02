@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<title>Verification</title>
+  <style type='text/css'>
+    ul { list-style: none; }
+    #recordingslist audio { display: block; margin-bottom: 10px; }
+  </style>
+  <script src="js/recorder.js"></script>
+  <script src="js/upload.js"></script>
+  <script src="js/utils.js"></script>
+</head>
+<body>
+
+  <h1>Verification</h1>
+  <p>ID</p>
+  <input type="id" id="id" name="id">
+  <p>Press record and after you have finished press stop.</p>
+
+  <button onclick="startRecording(this);">record</button>
+  <button onclick="stopRecording(this);" disabled>stop</button>
+  <input type="progress" id="progress" name="progress" disabled><br>
+  <br>
+  <button onclick="verify(this);">Verify</button>
+  <p id=response></p>
+  <h2>Recordings</h2>
+  <ul id="recordingslist"></ul>
+  
+  <script>
+  
+  function after_response(response) {
+      element = document.getElementById("response")
+      element.innerHTML = "<b>Result:</b> " 	  
+      element.innerHTML += response	  
+  }	  
+  function verify() {
+      element = document.getElementById("id")
+      if(id.value.trim() == ""){
+          element = document.getElementById("response")
+	  element.innerHTML = "<font color=\"red\">You need to fulfill the ID textinput</font>"	  
+ 	  return
+      }
+      var progressBar = document.getElementById('progress');
+      if(progressBar.value != "100"){
+          element = document.getElementById("response")
+	  element.innerHTML = "<font color=\"red\">Record the audio</font>"	  
+ 	  return
+      }
+      var myJson = {};
+      myJson['action'] = "verification";
+      myJson['id'] = element.value 
+      postJSONFile("action.json",myJson, after_response) 
+  }	  
+     
+  </script>
+
+</body>
+</html>

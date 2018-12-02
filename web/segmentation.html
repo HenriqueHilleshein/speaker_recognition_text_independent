@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<title>Segmentation</title>
+  <style type='text/css'>
+    ul { list-style: none; }
+    #recordingslist audio { display: block; margin-bottom: 10px; }
+  </style>
+</head>
+<body>
+
+  <h1>Segmentation</h1>
+  <p>Press record and after you have finished press stop.</p>
+
+  <button onclick="startRecording(this);">record</button>
+  <button onclick="stopRecording(this);" disabled>stop</button>
+  <input type="progress" id="progress" name="progress" disabled><br>
+  <br>
+  <button onclick="segment(this);">Segment</button>
+  <div id=response></div>
+  <h2>Recordings</h2>
+  <ul id="recordingslist"></ul>
+  
+  <script>
+  
+  function after_response(response) {
+      element = document.getElementById("response")
+      element.innerHTML = "<b>Result:</b><br> " 	  
+      element.innerHTML += response	  
+  }	  
+  function segment() {
+      var myJson = {};
+      myJson['action'] = "segmentation";
+      myJson['id'] = ""; 
+      postJSONFile("action.json",myJson, after_response) 
+  }	  
+  </script>
+
+  <script src="js/recorder.js"></script>
+  <script src="js/upload.js"></script>
+  <script src="js/utils.js"></script>
+</body>
+</html>

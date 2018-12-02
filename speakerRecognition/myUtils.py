@@ -4,9 +4,6 @@ import numpy
 import os
 import re
 from collections import defaultdict
-from sys import path
-
-path.append('../PyHTK/')
 import HTK
 from HTK import HTKFile
 
@@ -29,6 +26,9 @@ def load_coefficients(filepath, filenameList = None, speakersId = None,
         coefficientsDict[speaker].append(numpy.loadtxt(filepath 
                                          +filename, delimiter=","))            
     return coefficientsDict
+
+def load_one_file_cofficients(filename):
+    return numpy.loadtxt(filename, delimiter=",")
 
 def find_all_files(filepath, fileExtension):
     filenameList = [];
@@ -57,7 +57,6 @@ def code_data_to_MFCC(filepath, outputFilePath, configPath, filenameList = None)
     for filename in sorted(allOutputFiles):
         htk_reader.load(filename)
         result = numpy.array(htk_reader.data)
-        result = result[:,:-1]
         filename_out = (outputFilePath  
                        + re.search(".+\/(.+).mfc",filename).group(1)
                        + ".out")    

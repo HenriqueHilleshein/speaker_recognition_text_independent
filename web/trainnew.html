@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<title>Training</title>
+  <style type='text/css'>
+    ul { list-style: none; }
+    #recordingslist audio { display: block; margin-bottom: 10px; }
+  </style>
+  <script src="js/utils.js"></script>
+  <script src="js/recorder.js"></script>
+  <script src="js/upload.js"></script>
+</head>
+<body>
+
+  <h1>Train new speaker</h1>
+  <p>ID</p>
+  <input type="id" id="id" name="id">
+  <div id="trainTextsDiv">
+  </div>
+  <br>
+  <button onclick="train(this);">Train</button>
+  <p id=response></p>
+  <script>
+  var numberOfKeys
+  function populate() {
+      trainTextsDiv = document.getElementById("trainTextsDiv")	  
+      var keys = Object.keys(allTrainingTexts)
+      numberOfKeys = keys.length
+      for(var i = 0;i<numberOfKeys;i++){
+          var key = keys[i];
+          var text = allTrainingTexts[key];
+          var trainText = document.createElement('p')
+          var startButton = document.createElement('button')
+          var stopButton = document.createElement('button')
+          var progress = document.createElement('input')
+          var h2 = document.createElement('h2')
+          var h3 = document.createElement('h3')
+          var recordingslist = document.createElement('ul')
+	  trainText.innerHTML = text
+	  startButton.onclick = function() {startRecording(this);}
+	  startButton.innerHTML = "record"
+	  stopButton.onclick = function() {stopRecording(this);}
+	  stopButton.innerHTML = "stop"
+	  stopButton.id = i.toString();
+	  stopButton.disabled = true
+	  progress.type = "text"
+	  progress.id = "progress" + i.toString()
+	  progress.disabled = true
+          h2.innerHTML = "Text: " + key
+          h3.innerHTML = "Recordings"
+	  recordingslist.id = "recordingslist" + i.toString()
+          trainTextsDiv.appendChild(h2);
+          trainTextsDiv.appendChild(trainText);
+          trainTextsDiv.appendChild(startButton);
+          trainTextsDiv.appendChild(stopButton);
+          trainTextsDiv.appendChild(progress);
+          trainTextsDiv.appendChild(h3);
+          trainTextsDiv.appendChild(recordingslist);
+      }
+	      
+  }
+  function after_trained() {
+      element = document.getElementById("response")
+      element.innerHTML = "Trained"	  
+  }
+
+  function all_wav_sent(){
+      for(var i = 0;i<numberOfKeys;i++){
+          var progressBar = document.getElementById('progress' + i);
+	  if(progressBar.value != "100"){
+	      return false
+	  }
+      }
+      return true
+  }
+  function train() {
+      element = document.getElementById("id")
+      if(id.value.trim() == ""){
+          element = document.getElementById("response")
+	  element.innerHTML = "<font color=\"red\">You need to fulfill the ID textinput</font>"	  
+ 	  return
+      }
+      if(!all_wav_sent()){
+          element = document.getElementById("response")
+	  element.innerHTML = "<font color=\"red\">You need to record every text requested</font>"	  
+ 	  return
+      }
+      var myJson = {};
+      myJson['action'] = "train";
+      myJson['id'] = element.value 
+      postJSONFile("action.json",myJson, after_trained) 
+  }	  
+  var allTrainingTexts = {};
+  getJSONFile("trainingTexts.json", set_all_training_texts)
+  function set_all_training_texts(response) {
+      allTrainingTexts = response
+      populate()
+  }
+
+  </script>
+
+</body>
+</html>
